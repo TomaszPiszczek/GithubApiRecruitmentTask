@@ -4,6 +4,7 @@ import com.example.GithubApiRecruitmentTask.exception.UserNotFoundException;
 import com.example.GithubApiRecruitmentTask.model.githubRepositoryModel.Repository;
 import com.example.GithubApiRecruitmentTask.model.githubRepositoryModel.branch.Branch;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -20,9 +21,10 @@ public class GithubApiConnection {
 
     private final WebClient gitubWebClient;
 
-    public GithubApiConnection(WebClient.Builder webClientBuilder) {
-        this.gitubWebClient = webClientBuilder.baseUrl("https://api.github.com/").build();
+    public GithubApiConnection(WebClient.Builder webClientBuilder, @Value("${github_base_url}") String githubBaseUrl) {
+        this.gitubWebClient = webClientBuilder.baseUrl(githubBaseUrl).build();
     }
+
 
     public Set<Repository> getRepositoriesForUser(String username) {
         String url = String.format("/users/%s/repos", username);
