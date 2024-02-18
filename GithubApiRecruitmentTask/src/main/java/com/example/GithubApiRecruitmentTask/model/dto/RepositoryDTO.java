@@ -1,13 +1,14 @@
 package com.example.GithubApiRecruitmentTask.model.dto;
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.util.Set;
-@Data
-public class RepositoryDTO {
 
-    private String repositoryName;
-    private String ownerLogin;
-    private Set<BranchDTO> branchList;
-
+@JsonPropertyOrder({ "repository_name", "owner_login", "branchList" })
+public record RepositoryDTO(
+        @JsonProperty("repository_name") String repositoryName,
+        @JsonProperty("owner_login") String ownerLogin,
+        Set<BranchDTO> branchList
+) {
 }

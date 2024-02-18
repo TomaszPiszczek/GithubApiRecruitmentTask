@@ -12,23 +12,14 @@ import java.util.stream.Collectors;
 public class RepositoryMapper {
 
     public static RepositoryDTO mapToRepositoryDTO(Repository repository) {
-        RepositoryDTO repositoryDTO = new RepositoryDTO();
-        repositoryDTO.setRepositoryName(repository.getName());
-        repositoryDTO.setOwnerLogin(repository.getOwner().getLogin());
-        repositoryDTO.setBranchList(mapToBranchDTOList(repository.getBranchList()));
-        return repositoryDTO;
+        return new RepositoryDTO(repository.getName(), repository.getOwner().login(), mapToBranchDTOList(repository.getBranchList()));
     }
 
     public static Set<BranchDTO> mapToBranchDTOList(Set<Branch> branches) {
-        return branches.stream()
-                .map(RepositoryMapper::mapToBranchDTO)
-                .collect(Collectors.toSet());
+        return branches.stream().map(RepositoryMapper::mapToBranchDTO).collect(Collectors.toSet());
     }
 
     public static BranchDTO mapToBranchDTO(Branch branch) {
-        BranchDTO branchDTO = new BranchDTO();
-        branchDTO.setName(branch.getName());
-        branchDTO.setLastCommitSHA(branch.getCommit().getSha());
-        return branchDTO;
+        return new BranchDTO(branch.name(), branch.commit().sha());
     }
 }

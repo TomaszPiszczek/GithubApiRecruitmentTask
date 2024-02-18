@@ -24,10 +24,21 @@ public class RepositoryService {
     }
 
     public Set<RepositoryDTO> getRepositories(String username) {
-        Set<Repository> repos = githubApiConnection.getRepositoriesForUser(username);
-        List<CompletableFuture<Void>> futures = new ArrayList<>();
 
-        for (Repository repo : repos) {
+        Set<Repository> repositories = assignBranchesToRepository(githubApiConnection.getRepositoriesForUser(username),username);
+
+        return repositories.stream()
+                .map(RepositoryMapper::mapToRepositoryDTO)
+                .collect(Collectors.toSet());
+    }
+
+    private Set<Branch> getBranches(String repositoryName, String username) {
+        return githubApiConnection.getBranchesForRepository(username, repositoryName);
+    }
+    private Set<Repository> assignBranchesToRepository(Set<Repository> repositoryList,String username){
+
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+        for (Repository repo : repositoryList) {
             CompletableFuture<Void> future = CompletableFuture.runAsync(() ->
                     repo.setBranchList(getBranches(repo.getName(), username)));
             futures.add(future);
@@ -35,12 +46,6 @@ public class RepositoryService {
 
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
-        return repos.stream()
-                .map(RepositoryMapper::mapToRepositoryDTO)
-                .collect(Collectors.toSet());
-    }
-
-    private Set<Branch> getBranches(String repositoryName, String username) {
-        return githubApiConnection.getBranchesForRepository(username, repositoryName);
+        return repositoryList;
     }
 }

@@ -1,9 +1,6 @@
 package com.example.GithubApiRecruitmentTask.model.dto;
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@Data
-public class BranchDTO {
-    private String name;
-    private String lastCommitSHA;
+public record BranchDTO(String name, @JsonProperty("last_commit_sha") String lastCommitSHA) {
 }
