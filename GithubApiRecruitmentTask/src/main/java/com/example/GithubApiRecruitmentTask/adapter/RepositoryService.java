@@ -1,18 +1,17 @@
 package com.example.GithubApiRecruitmentTask.adapter;
 
-import com.example.GithubApiRecruitmentTask.WebClient.GithubApiConnection;
-import com.example.GithubApiRecruitmentTask.mapper.RepositoryMapper;
-import com.example.GithubApiRecruitmentTask.model.dto.RepositoryDTO;
-import com.example.GithubApiRecruitmentTask.model.githubRepositoryModel.Repository;
-import com.example.GithubApiRecruitmentTask.model.githubRepositoryModel.branch.Branch;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+        import com.example.GithubApiRecruitmentTask.WebClient.GithubApiConnection;
+        import com.example.GithubApiRecruitmentTask.mapper.RepositoryMapper;
+        import com.example.GithubApiRecruitmentTask.model.dto.RepositoryDTO;
+        import com.example.GithubApiRecruitmentTask.model.githubRepositoryModel.Repository;
+        import com.example.GithubApiRecruitmentTask.model.githubRepositoryModel.branch.Branch;
+        import lombok.extern.slf4j.Slf4j;
+        import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
+        import java.util.Set;
+        import java.util.concurrent.ExecutorService;
+        import java.util.concurrent.Executors;
+        import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -37,14 +36,21 @@ public class RepositoryService {
     }
     private Set<Repository> assignBranchesToRepository(Set<Repository> repositoryList,String username){
 
-        List<CompletableFuture<Void>> futures = new ArrayList<>();
-        for (Repository repo : repositoryList) {
-            CompletableFuture<Void> future = CompletableFuture.runAsync(() ->
-                    repo.setBranchList(getBranches(repo.getName(), username)));
-            futures.add(future);
+
+        try (ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor()){
+            for (Repository repo : repositoryList) {
+                executorService.submit(() -> {
+                    repo.setBranchList(getBranches(repo.getName(), username));
+
+                });
+            }
+            executorService.shutdown();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
 
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
 
         return repositoryList;
     }
