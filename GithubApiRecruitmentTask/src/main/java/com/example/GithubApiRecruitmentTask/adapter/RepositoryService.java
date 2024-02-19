@@ -9,6 +9,7 @@ package com.example.GithubApiRecruitmentTask.adapter;
         import org.springframework.stereotype.Component;
 
         import java.util.Set;
+        import java.util.concurrent.CompletableFuture;
         import java.util.concurrent.ExecutorService;
         import java.util.concurrent.Executors;
         import java.util.stream.Collectors;
@@ -38,12 +39,13 @@ public class RepositoryService {
 
 
         try (ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor()){
+            CompletableFuture<Void> future = new CompletableFuture<>();
             for (Repository repo : repositoryList) {
-                executorService.submit(() -> {
-                    repo.setBranchList(getBranches(repo.getName(), username));
-
-                });
+                 future = CompletableFuture.runAsync(
+                        ()-> repo.setBranchList(getBranches(repo.getName(), username)),executorService);
             }
+            future.join();
+
             executorService.shutdown();
 
         } catch (Exception ex) {
